@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ Панель</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+</head>
+<body>
+    <!-- Кнопка переключения мобильного меню -->
+    <button class="mobile-nav-toggle">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- Оверлей для мобильной версии -->
+    <div class="sidebar-overlay"></div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Боковая панель навигации -->
+            <div class="col-md-3 col-lg-2 sidebar p-0">
+                <div class="d-flex flex-column">
+                    <div class="p-3 text-center">
+                        <h5 class="text-white">Assem - admin</h5>
+                    </div>
+                    <nav class="nav flex-column">
+                        <a class="nav-link active" href="/admin"><i class="fas fa-home"></i> Главная</a>
+                        <a class="nav-link" href="/admin/avatars"><i class="fas fa-user-circle"></i> Аватары</a>
+                        <a class="nav-link" href="/admin/status"><i class="fas fa-cogs"></i> Система</a>
+                        <a class="nav-link" href="/admin/users"><i class="fas fa-users"></i> Пользователи</a>
+                        <a class="nav-link" href="/admin/payment"><i class="fas fa-credit-card"></i> Платежи</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Основной контент -->
+            {% block main_content %}
+            {% endblock %}
+
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Получаем текущий URL
+            var currentUrl = window.location.pathname;
+
+            // Перебираем ссылки в навигации
+            $('.nav-link').each(function () {
+                // Проверяем, совпадает ли href ссылки с текущим URL
+                if ($(this).attr('href') === currentUrl) {
+                    // Удаляем класс active у всех ссылок и добавляем его к текущей
+                    $('.nav-link').removeClass('active');
+                    $(this).addClass('active');
+                }
+            });
+        });
+
+        // JavaScript для управления мобильным меню
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileToggle = document.querySelector('.mobile-nav-toggle');
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.querySelector('.sidebar-overlay');
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+
+            function toggleSidebar() {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+                document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+            }
+
+            mobileToggle.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', toggleSidebar);
+
+            // Закрывать меню при клике на ссылку в мобильной версии
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 992) {
+                        toggleSidebar();
+                    }
+                });
+            });
+
+            // Обработка изменения размера окна
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 992) {
+                    sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

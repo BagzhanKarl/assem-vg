@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<div class="col-md-9 col-lg-10 main-content">
+
+    <h2><a class="head-link" href="/admin/avatars">Аватары</a> &rarr; {{avatar.title}}</h2>
+    <hr>
+
+    <div class="row">
+        <div class="col-md-12 col-sm-6">
+            <div class="card">
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label for="avatarName" class="form-label">Имя аватара</label>
+                            <input type="text" name="title" class="form-control" value="{{ avatar.title }}" id="avatarName" placeholder="Введите имя аватара">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="systemMessage" class="form-label">Системное сообщение</label>
+                            <textarea class="form-control" name="instruction" id="systemMessage" rows="6" placeholder="Введите системное сообщение">{{ avatar.instruction }}</textarea>
+                            <div class="char-counter text-end text-secondary mt-1">
+                                <small><span id="currentCount">0</span> / <span id="maxCount">2000</span> символов</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label d-block">Точность ответа</label>
+                            <div class="form-range-wrapper">
+                                <label for="customRange1" class="form-range-value">{{ avatar.temp }}</label>
+                                <input type="range" value="0.8" name="temp" class="form-range" id="customRange1">
+                                <div class="d-flex justify-content-between">
+                                    <div class="form-text text-secondary">Точные и строгие ответы</div>
+                                    <div class="form-text text-secondary">Креативные ответы</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Сохранить</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            const rangeInput = $('#customRange1');
+            const rangeLabel = $('label[for="customRange1"]');
+
+            // Установка начальных значений
+            rangeInput.attr({
+                min: 0,
+                max: 2,
+                step: 0.1,
+                value: {{ avatar.temp }}
+            });
+
+            // Обновление значения при перемещении ползунка
+            rangeInput.on('input', function() {
+                const value = parseFloat($(this).val()).toFixed(1);
+                rangeLabel.text(value);
+            });
+
+            const textarea = $('#systemMessage');
+            const currentCount = $('#currentCount');
+            const maxCount = $('#maxCount');
+            const maxLength = 10000; // Максимальное количество символов
+
+            // Устанавливаем максимальное значение в HTML
+            textarea.attr('maxlength', maxLength);
+            maxCount.text(maxLength);
+
+            // Обновляем начальное количество символов
+            currentCount.text(textarea.val().length);
+
+            // Обновление счетчика при вводе
+            textarea.on('input', function() {
+                const currentLength = $(this).val().length;
+                currentCount.text(currentLength);
+
+                // Изменение стилей при приближении к лимиту
+                const counter = $('.char-counter');
+
+                if (currentLength >= maxLength) {
+                    counter.removeClass('text-secondary text-warning').addClass('text-danger');
+                    textarea.addClass('at-limit').removeClass('near-limit');
+                } else if (currentLength >= maxLength * 0.9) { // При достижении 90% лимита
+                    counter.removeClass('text-secondary text-danger').addClass('text-warning');
+                    textarea.addClass('near-limit').removeClass('at-limit');
+                } else {
+                    counter.addClass('text-secondary').removeClass('text-warning text-danger');
+                    textarea.removeClass('near-limit at-limit');
+                }
+
+                // Анимация при достижении лимита
+                if (currentLength === maxLength) {
+                    counter.removeClass('pulse').addClass('pulse');
+                    setTimeout(() => counter.removeClass('pulse'), 1000);
+                }
+            });
+
+            // Триггерим событие input для начальной проверки
+            textarea.trigger('input');
+        });
+    </script>
+{% endblock %}

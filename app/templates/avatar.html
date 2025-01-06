@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block main_content %}
+<div class="col-md-9 col-lg-10 main-content">
+
+    <h2>Аватары</h2>
+    <hr>
+
+    <div class="row">
+        {% for avatar in avatars %}
+            <div class="col-md-4 col-sm-6">
+                <div class="card h-100" style="max-width: 400px;">
+                    <div class="card-header d-flex justify-content-between align-items-center bg-white border-bottom-0 pt-3 pb-0">
+                        <h5 class="mb-0">{{ avatar.title }}</h5>
+                        <label class="switch">
+                            <input type="checkbox" hidden="" class="active_checkbox" value="{{ avatar.id }}" {% if avatar.is_active %} checked {% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text mb-3">
+                            {{ avatar.instruction | truncate(150, True, '...') }}
+
+                        </p>
+                    </div>
+                    <div class="card-footer bg-white">
+                        <a href="/admin/avatars/edit/{{ avatar.id }}" class="btn btn-primary w-100">Изменить</a>
+                    </div>
+                </div>
+
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        function change_active_mod(id){
+            $.ajax({
+                url: `/avatar/change/${id}`,
+                method: 'POST',
+                success: function(answer){
+                    window.location.reload()
+                }
+            })
+        }
+        $(document).ready(function (){
+            $('.active_checkbox').on('change', function () {
+                const isChecked = $(this).prop('checked');
+                const value = $(this).val();
+
+                change_active_mod(value)
+            });
+
+        })
+    </script>
+{% endblock %}
